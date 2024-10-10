@@ -312,6 +312,16 @@ proof_clause cdcl::learn_decision(const branching_sequence::reverse_iterator& fi
   return c;
 }
 
+// Just learn the trail
+proof_clause cdcl::learn_dpll(const branching_sequence::reverse_iterator& first_decision) {
+  vector<literal> decisions;
+  for (auto it = branching_seq.rbegin(); it!=branching_seq.rend(); ++it) {
+    literal l = it->to;
+    if (reasons[l.l].empty()) decisions.push_back(~l);
+  }
+  return proof_clause(clause(decisions));
+}
+
 // Clause minimization. Try eliminating literals from the clause by
 // resolving them with a reason.
 void cdcl::minimize(proof_clause& c) const {
@@ -388,13 +398,17 @@ void cdcl::learn() {
 
   if (config_minimize) minimize(learnt_clause);
 
-  LOG(LOG_EFFECTS) << Colour::Modifier(Colour::FG_GREEN) << "Learned: " << Colour::Modifier(Colour::FG_DEFAULT) << learnt_clause << endl;
-  if(trace) *trace << "# learnt:" << learnt_clause << endl;
-  clause d = learnt_clause.derivation.front()->c;
-  for (auto it=++learnt_clause.derivation.begin();it!=learnt_clause.derivation.end();++it) {
-    d = resolve(d,(*it)->c);
+  if (not learnt_clause.derivation.empty()) {
+    LOG(LOG_EFFECTS) << Colour::Modifier(Colour::FG_GREEN) << "Learned: " << Colour::Modifier(Colour::FG_DEFAULT) << learnt_clause << endl;
+    if(trace) *trace << "# learnt:" << learnt_clause << endl;
+    {
+      clause d = learnt_clause.derivation.front()->c;
+      for (const auto& c : learnt_clause.derivation) {
+        d = resolve(d,c->c);
+      }
+    }
+    learnt_clause.trail = branching_seq;
   }
-  learnt_clause.trail = branching_seq;
 
   assert(not config_backjump or
          find_if(working_clauses.begin(), working_clauses.end(),
@@ -403,7 +417,7 @@ void cdcl::learn() {
                  }) == working_clauses.end());
   
   if (solved) {
-    LOG(LOG_EFFECTS) << "I learned the following clauses:" << endl << learnt_clauses << endl;
+    //LOG(LOG_EFFECTS) << "I learned the following clauses:" << endl << learnt_clauses << endl;
     return;
   }
 

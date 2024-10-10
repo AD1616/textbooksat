@@ -53,6 +53,7 @@ std::function<proof_clause(cdcl&, const branching_sequence::reverse_iterator&)> 
   proof_clause learn_fuip_all(const branching_sequence::reverse_iterator& first_decision);
   proof_clause learn_luip(const branching_sequence::reverse_iterator& first_decision);
   proof_clause learn_decision(const branching_sequence::reverse_iterator& first_decision);
+  proof_clause learn_dpll(const branching_sequence::reverse_iterator& first_decision);
 
   bool variable_cmp_vsids(variable, variable) const;
   bool variable_cmp_fixed(variable, variable) const;

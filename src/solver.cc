@@ -67,6 +67,7 @@ proof cdcl_solver::solve(const cnf& f) {
   else if (learn == "lastuip") solver.learn_plugin = &cdcl::learn_luip;
   else if (learn == "1uip-all") solver.learn_plugin = &cdcl::learn_fuip_all;
   else if (learn == "decision") solver.learn_plugin = &cdcl::learn_decision;
+  else if (learn == "dpll") solver.learn_plugin = &cdcl::learn_dpll;
   else {
     cerr << "Invalid learning scheme" << endl;
     exit(1);
